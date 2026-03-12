@@ -26,14 +26,18 @@ public class BookingController {
         List<Booking> processedBookings = new ArrayList<>();
 
         for (Booking booking : newBookings) {
-            boolean bookingExists = savedBookings.stream().anyMatch(existing ->
-                existing.getRoomNumber() == booking.getRoomNumber() &&
-                existing.getBookingDate().equals(booking.getBookingDate())
-            );
+
+            if (booking.getRoomNumber() < 1 || booking.getRoomNumber() > 9) {
+                return ResponseEntity.badRequest().body("Error: Invalid room number: "+ booking.getRoomNumber() +" (must be between 1 and 9)");
+            }
+
+            boolean bookingExists = savedBookings.stream()
+                    .anyMatch(existing -> existing.getRoomNumber() == booking.getRoomNumber() &&
+                            existing.getBookingDate().equals(booking.getBookingDate()));
 
             if (bookingExists) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body("Room"+booking.getRoomNumber()+"is already taken on "+booking.getBookingDate());
+                        .body("Room" + booking.getRoomNumber() + "is already taken on " + booking.getBookingDate());
             } else {
                 processedBookings.add(booking);
             }
