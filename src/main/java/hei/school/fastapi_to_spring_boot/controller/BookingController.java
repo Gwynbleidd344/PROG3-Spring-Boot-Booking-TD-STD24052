@@ -3,7 +3,11 @@ package hei.school.fastapi_to_spring_boot.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import hei.school.fastapi_to_spring_boot.model.Booking;
@@ -15,5 +19,26 @@ public class BookingController {
     @GetMapping("/bookings")
     public List<Booking> getSavedBookings() {
         return savedBookings;
+    }
+
+    @PostMapping("/bookings")
+    public ResponseEntity<?> createBooking(@RequestBody List<Booking> newBookings) {
+        List<Booking> processedBookings = new ArrayList<>();
+
+        for (Booking booking : newBookings) {
+            boolean bookingExists = savedBookings.stream().anyMatch(existing ->
+                existing.getRoomNumber() == booking.getRoomNumber() &&
+                existing.getBookingDate().equals(booking.getBookingDate())
+            );
+
+            if (bookingExists) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("Room"+booking.getRoomNumber()+"is already taken on "+booking.getBookingDate());
+            } else {
+                processedBookings.add(booking);
+            }
+        }
+        savedBookings.addAll(processedBookings);
+        return ResponseEntity.ok(processedBookings);
     }
 }
