@@ -43,6 +43,6 @@ public class BookingController {
             }
         }
         savedBookings.addAll(processedBookings);
-        return ResponseEntity.ok(processedBookings);
+        return ResponseEntity.status(HttpStatus.CREATED).body(processedBookings);
     }
 }
